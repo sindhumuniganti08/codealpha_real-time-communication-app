@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "nikhithamuniganti37@gmail.com",
+      "password": "$2a$10$EYsWFYTJRIBjvbertZWs9Ob5ZQOR4gtq97SyBPKMSKeVbe0Hm3mEu",
+      "avatar": "https://ui-avatars.com/api/?name=nikhithamuniganti37%40gmail.com&background=random&color=fff&size=128",
+      "bio": "sindhu muniganti rom hyderabad",
+      "created_at": "2026-07-02T17:06:17.196Z"
+    }
+  ],
+  "files": []
+}

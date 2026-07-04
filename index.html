@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseMeet - Real-Time Communication Hub</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+
+  <!-- AUTH SCREEN (LOBBY) -->
+  <div id="auth-screen" class="auth-container">
+    <div class="auth-card glass-panel">
+      <div class="auth-header">
+        <h1 class="logo-text gradient-text">PulseMeet</h1>
+        <p class="auth-subtitle">Encrypted Video Conferencing & Collaboration</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tab-login" class="tab-btn active" onclick="switchAuthTab('login')">Login</button>
+        <button id="tab-register" class="tab-btn" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" class="auth-form" onsubmit="handleAuthSubmit(event, 'login')">
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" class="auth-form hidden" onsubmit="handleAuthSubmit(event, 'register')">
+        <div class="form-group">
+          <label for="register-username">Username</label>
+          <input type="text" id="register-username" placeholder="Choose username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" placeholder="Choose strong password" required autocomplete="new-password">
+        </div>
+        <div class="form-group">
+          <label for="register-bio">Short Bio</label>
+          <textarea id="register-bio" placeholder="Tell us about yourself..." rows="2"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+      </form>
+      <div id="auth-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- MEETING ROOM SETUP / JOINER LOBBY -->
+  <div id="lobby-screen" class="auth-container hidden">
+    <div class="auth-card glass-panel" style="width: 500px;">
+      <div class="auth-header">
+        <h2 class="logo-text gradient-text">Join / Create Room</h2>
+        <p class="auth-subtitle">Select meeting settings</p>
+      </div>
+
+      <div class="user-profile-badge">
+        <img src="" id="lobby-user-avatar" alt="Avatar" class="avatar-small">
+        <div>
+          <span id="lobby-user-name">Loading...</span>
+          <span class="user-tag" onclick="handleLogout()" style="cursor:pointer;color:var(--danger)">Logout</span>
+        </div>
+      </div>
+
+      <form id="join-room-form" onsubmit="handleJoinRoom(event)">
+        <div class="form-group">
+          <label for="room-id-input">Room ID</label>
+          <input type="text" id="room-id-input" placeholder="e.g. general-session" required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="chat-secret-key">E2E Chat Key (Shared Secret)</label>
+          <input type="text" id="chat-secret-key" value="pulse-secure-key" placeholder="Enter key for data encryption" required autocomplete="off">
+          <p class="info-note">All chat messages will be encrypted/decrypted on the client side using this secret phrase.</p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Join Session</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN CONFERENCING INTERFACE -->
+  <div id="app-dashboard" class="app-layout hidden">
+    
+    <!-- MAIN WORKSPACE -->
+    <div class="main-wrapper">
+      
+      <!-- HEADER -->
+      <header class="app-header glass-panel">
+        <div class="header-room-info">
+          <h2 id="view-title" class="view-title">Active Room: <span id="current-room-name" class="gradient-text">-</span></h2>
+        </div>
+        <div class="header-controls">
+          <div class="secret-key-display">
+            <span class="badge badge-info">E2E Secure Mode</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- DYNAMIC SCREEN CONTAINERS -->
+      <main class="content-body">
+        
+        <!-- VIDEO GRID & COLLABORATION SPLIT -->
+        <div class="collaboration-workspace">
+          
+          <!-- VIDEO CALL PANELS -->
+          <div class="video-workspace-panel">
+            <div class="video-grid" id="video-grid">
+              <!-- Local Video Container -->
+              <div class="video-container" id="local-video-container">
+                <video id="local-video" autoplay playsinline muted></video>
+                <div class="video-overlay-tag">You (Local Stream)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLLABORATIVE WHITEBOARD PANEL -->
+          <div id="whiteboard-workspace-panel" class="whiteboard-panel glass-panel hidden">
+            <div class="whiteboard-header">
+              <h3>Collaborative Whiteboard</h3>
+              <div class="whiteboard-controls">
+                <div class="control-item">
+                  <label for="brush-color">Color</label>
+                  <input type="color" id="brush-color" value="#6366f1">
+                </div>
+                <div class="control-item">
+                  <label for="brush-size">Size</label>
+                  <input type="range" id="brush-size" min="1" max="20" value="5">
+                </div>
+                <button class="btn btn-secondary text-small" onclick="clearWhiteboardLocalAndRemote()">Clear Board</button>
+              </div>
+            </div>
+            <div class="canvas-wrapper">
+              <canvas id="whiteboard-canvas"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+
+      <!-- BOTTOM CONTROL BAR -->
+      <div class="bottom-dock-bar glass-panel">
+        <button class="dock-btn" id="btn-toggle-audio" onclick="toggleAudioStream()">
+          <svg class="icon" viewBox="0 0 24 24" id="icon-mic"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+          <span class="btn-lbl">Mute</span>
+        </button>
+
+        <button class="dock-btn" id="btn-toggle-video" onclick="toggleVideoStream()">
+          <svg class="icon" viewBox="0 0 24 24" id="icon-camera"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4zM14 16H6v-8h8v8z"/></svg>
+          <span class="btn-lbl">Camera Off</span>
+        </button>
+
+        <button class="dock-btn" id="btn-screen-share" onclick="toggleScreenShareStream()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.11-.9-2-2-2H4c-1.11 0-2 .89-2 2v10c0 1.1.89 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"/></svg>
+          <span class="btn-lbl">Share Screen</span>
+        </button>
+
+        <button class="dock-btn" id="btn-toggle-whiteboard" onclick="toggleWhiteboardPanel()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          <span class="btn-lbl">Whiteboard</span>
+        </button>
+
+        <button class="dock-btn btn-danger-dock" onclick="leaveSession()">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+          <span class="btn-lbl">Leave</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR: ENCRYPTED CHAT & FILES -->
+    <aside class="sidebar glass-panel">
+      
+      <!-- TABS -->
+      <div class="sidebar-tabs">
+        <button id="sidebar-tab-chat" class="tab-btn active" onclick="switchSidebarTab('chat')">Secure Chat</button>
+        <button id="sidebar-tab-files" class="tab-btn" onclick="switchSidebarTab('files')">Files</button>
+      </div>
+
+      <!-- CHAT INTERFACE -->
+      <div id="sidebar-chat-content" class="sidebar-content-area">
+        <div class="chat-logs-container" id="chat-messages-container">
+          <!-- Text logs -->
+        </div>
+
+        <!-- CIPHER LOG MONITOR (Showing Encryption validation) -->
+        <div class="cipher-log-monitor">
+          <label>Network Ciphertext Stream</label>
+          <div id="network-cipher-log">
+            Listening for E2E packets...
+          </div>
+        </div>
+
+        <form class="comment-input-form" onsubmit="handleSendChat(event)">
+          <input type="text" id="chat-new-msg" placeholder="Write encrypted message..." required class="input-flat">
+          <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+      </div>
+
+      <!-- FILES INTERFACE -->
+      <div id="sidebar-files-content" class="sidebar-content-area hidden">
+        <div class="file-uploader-box">
+          <label class="custom-file-upload">
+            <input type="file" id="file-uploader-input" onchange="handleShareFile(this)">
+            <span>Select File to Share</span>
+          </label>
+          <p class="info-note">Supports images, documents, and code files (limit 5MB).</p>
+        </div>
+
+        <div class="files-list-box">
+          <h4>Shared Room Files</h4>
+          <div class="files-list" id="shared-files-container">
+            <span class="text-small" style="color:var(--text-muted);display:block;text-align:center;padding:20px;">No files shared in this room.</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+  <!-- Toast Notification Overlay -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Socket.io connection library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
