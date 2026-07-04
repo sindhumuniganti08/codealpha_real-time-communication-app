@@ -1,0 +1,3 @@
+The Real-Time Communication App is a full-stack web application that enables users to communicate and collaborate seamlessly through video conferencing and real-time collaboration features. Built using modern web technologies, the application supports secure user authentication, high-quality video calls, screen sharing, file sharing, and an interactive whiteboard for collaborative work.
+
+The project leverages WebRTC for peer-to-peer media streaming and Socket.io for real-time communication, providing a smooth and responsive user experience. It demonstrates the implementation of real-time networking, secure authentication, media streaming, and collaborative tools in a scalable web application.
